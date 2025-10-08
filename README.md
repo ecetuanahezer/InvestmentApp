@@ -23,32 +23,32 @@ The app allows you to:
 ## 🧩 Project Structure
 
 
-investment-funds-tracker/
-│
-├── app.py # Streamlit app (main interface)
-├── analyze.py # Fund change calculations
-├── ingest_data.py # Data parsing and ingestion
-├── database.py # SQLAlchemy database setup
-│
-├── data/ # Saved fund data (daily .txt files)
-├── data_assets/ # Saved asset data (daily .txt files)
-│
-├── requirements.txt # Python dependencies
-└── README.md # Project documentation
+investmentapp
+
+* app.py # Streamlit app (main interface)
+* analyze.py # Fund change calculations
+* ingest_data.py # Data parsing and ingestion
+* database.py # SQLAlchemy database setup
+
+* data/ # Saved fund data (daily .txt files)
+* data_assets/ # Saved asset data (daily .txt files)
+
+* requirements.txt # Python dependencies
+* README.md # Project documentation
 
 ## ⚙️ Installation & Setup
 
 ### 1 Clone the repository
 bash
-git clone https://github.com/YOUR_USERNAME/investment-funds-tracker.git
-cd investment-funds-tracker
+* git clone https://github.com/ecetuanahezer/InvestmentApp.git
+* cd investmentapp
 
 ### 2 Create a virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate    # On macOS/Linux
-venv\Scripts\activate       # On Windows
+* python -m venv venv
+* source venv/bin/activate    # On macOS/Linux
+* venv\Scripts\activate       # On Windows
 
 ### 3 Install dependencies
 
-▶️ How to Run
+### ▶️ How to Run
 streamlit run app.py

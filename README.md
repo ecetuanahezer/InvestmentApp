@@ -23,7 +23,7 @@ The app allows you to:
 ## 🧩 Project Structure
 
 
-investmentapp/
+investment-funds-tracker/
 │
 ├── app.py # Streamlit app (main interface)
 ├── analyze.py # Fund change calculations
@@ -32,6 +32,7 @@ investmentapp/
 │
 ├── data/ # Saved fund data (daily .txt files)
 ├── data_assets/ # Saved asset data (daily .txt files)
+│
 ├── requirements.txt # Python dependencies
 └── README.md # Project documentation
 
@@ -49,5 +50,5 @@ venv\Scripts\activate       # On Windows
 
 ### 3 Install dependencies
 
-### How to Run
+▶️ How to Run
 streamlit run app.py

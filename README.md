@@ -51,7 +51,7 @@ bash
 ### 3 Install dependencies
 pip install -r requirements.txt
 
-### Initial Data Load
+### 4 Initial Data Load
 Before running the Streamlit app for the first time, you should initialize the database and import all existing data files.
 Run the following command once:
 - python ingest_data.py

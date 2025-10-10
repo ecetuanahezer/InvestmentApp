@@ -30,12 +30,12 @@ def get_all_funds_changes(start_date, end_date):
     pivot = df.pivot(index="date", columns="fund_code", values="value_tl").sort_index()
     
     # Daily changes for each fund
-    fund_changes = pivot.diff()
-    fund_pct_changes = pivot.pct_change() * 100
+    fund_changes = pivot.diff().fillna(0)
+    fund_pct_changes = (pivot.pct_change() * 100).fillna(0)
 
     # Total portfolio per day (sum of all funds)
     total = pivot.sum(axis=1)
-    total_change = total.diff()
+    total_change = total.diff().fillna(0)
     total_pct_change = total.pct_change() * 100
 
     # -------------------

@@ -4,6 +4,7 @@ A simple **Streamlit** web app to track and analyze investment fund performance 
 The app allows you to:
 - Upload daily fund values (from a text file or text input)
 - Add other assets such as **precious metals**, **crypto**, and **physical gold**
+- Delete fund/asset data if needed
 - View daily fund-level changes (TL and %)
 - Analyze total portfolio performance between selected dates
 - Identify top and bottom performing funds
@@ -21,7 +22,6 @@ The app allows you to:
 ---
 
 ## 🧩 Project Structure
-
 
 investmentapp
 
@@ -46,9 +46,15 @@ bash
 ### 2 Create a virtual environment (recommended)
 * python -m venv venv
 * source venv/bin/activate    # On macOS/Linux
-* venv\Scripts\activate       # On Windows
+* source venv/Scripts/activate       # On Windows
 
 ### 3 Install dependencies
+pip install -r requirements.txt
+
+### Initial Data Load
+Before running the Streamlit app for the first time, you should initialize the database and import all existing data files.
+Run the following command once:
+- python ingest_data.py
 
 ### ▶️ How to Run
-streamlit run app.py
+- streamlit run app.py

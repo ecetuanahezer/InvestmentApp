@@ -1,2 +1,2 @@
 precious_metals	crypto	physical_gold
-640000.0	54000.0	834000.0
+645099.0	50614.0	836550.0

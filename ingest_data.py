@@ -5,6 +5,7 @@ Contains functions to parse and save both fund and asset data files to the datab
 import datetime
 import glob
 import os
+import numpy as np
 from sqlalchemy.exc import IntegrityError
 from database import FundValue, AssetValue, SessionLocal, init_db
 
@@ -96,14 +97,13 @@ def parse_and_save_asset(file_path_or_buffer, date: datetime.date):
         print(f"{file_path_or_buffer} asset values could not be converted to float.")
         return
 
-    data = dict(zip(names, values))
     session = SessionLocal()
 
     entry = AssetValue(
         date=date,
-        precious_metals_tl=data.get("precious metals", 0),
-        crypto_tl=data.get("crypto", 0),
-        physical_gold_tl=data.get("physical gold", 0),
+        precious_metals_tl=np.nan_to_num(values[0], nan=0.0),
+        crypto_tl=np.nan_to_num(values[1], nan=0.0),
+        physical_gold_tl=np.nan_to_num(values[2], nan=0.0),
     )
 
     session.add(entry)
@@ -115,8 +115,7 @@ def parse_and_save_asset(file_path_or_buffer, date: datetime.date):
         print(f"⚠️ Duplicate asset data for {date}, skipped.")
 
     session.close()
-
-
+    
 def load_all_data():
     """
     Loads and saves all fund and asset data files from their respective folders.

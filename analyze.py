@@ -1,6 +1,7 @@
 # analyze.py
 # Analyze all funds changes
-from database import FundValue, SessionLocal
+import numpy as np
+from database import AssetValue, FundValue, SessionLocal
 from sqlalchemy import and_
 import pandas as pd
 
@@ -27,55 +28,131 @@ def get_all_funds_changes(start_date, end_date):
     df = pd.DataFrame(query, columns=["date", "fund_code", "value_tl"])
     
     # Pivot table: rows = date, columns = fund code
-    pivot = df.pivot(index="date", columns="fund_code", values="value_tl").sort_index()
+    pivot = df.pivot(index="date", columns="fund_code", values="value_tl").sort_index().fillna(0)
     
     # Daily changes for each fund
     fund_changes = pivot.diff().fillna(0)
-    fund_pct_changes = (pivot.pct_change() * 100).fillna(0)
-
-    # Total portfolio per day (sum of all funds)
-    total = pivot.sum(axis=1)
-    total_change = total.diff().fillna(0)
-    total_pct_change = total.pct_change() * 100
-
-    # -------------------
-    # Summary calculations
-    # -------------------
-    first_values = pivot.iloc[0]
-    last_values = pivot.iloc[-1]
-
-    # Total TL and % change per fund (first vs last date)
-    fund_total_change_tl = last_values - first_values
-    fund_total_change_pct = ((last_values - first_values) / first_values) * 100
-
-    # Total portfolio summary change
-    total_change_tl_summary = fund_total_change_tl.sum()
-    total_change_pct_summary = (last_values.sum() - first_values.sum()) / first_values.sum() * 100
-
-    # Top 5 performing funds
-    top5_pct = fund_total_change_pct.sort_values(ascending=False).head(5)
-    top5_tl = fund_total_change_tl.sort_values(ascending=False).head(5)
-
-    # Bottom 5 performing funds
-    bottom5_pct = fund_total_change_pct.sort_values().head(5)
-    bottom5_tl = fund_total_change_tl.sort_values().head(5)
+    fund_pct_changes = (pivot.pct_change().replace([np.inf, -np.inf], 0) * 100).fillna(0)
+    total = pivot.sum(axis=1).fillna(0)
+    total_funds_change = total.diff().fillna(0)
+    total_pct_change = (total.pct_change().replace([np.inf, -np.inf], 0) * 100).fillna(0)
 
     result = {
-        "pivot": pivot,                         # TL values for each fund
-        "fund_changes": fund_changes,           # Daily TL change per fund
-        "fund_pct_changes": fund_pct_changes,   # Daily % change per fund
-        "total": total,                         # Total portfolio TL per day
-        "total_change": total_change,           # Daily portfolio TL change
-        "total_pct_change": total_pct_change,   # Daily portfolio % change
-        # Summary
-        "fund_total_change_tl": fund_total_change_tl,     # Total TL change per fund
-        "fund_total_change_pct": fund_total_change_pct,   # Total % change per fund
-        "total_change_tl_summary": total_change_tl_summary,   # Total portfolio TL change summary
-        "total_change_pct_summary": total_change_pct_summary, # Total portfolio % change summary
-        "top5_pct": top5_pct,                     # Top 5 funds by % change
-        "top5_tl": top5_tl,                       # Top 5 funds by TL change
-        "bottom5_pct": bottom5_pct,               # Bottom 5 funds by % change
-        "bottom5_tl": bottom5_tl                  # Bottom 5 funds by TL change
+        "pivot": pivot,
+        "fund_changes": fund_changes,
+        "fund_pct_changes": fund_pct_changes,
+        "total_funds": total,
+        "total_funds_change": total_funds_change,
+        "total_pct_change": total_pct_change,
     }
-    
+
     return result
+
+def get_all_assets_changes(start_date, end_date):
+    """
+    Returns the daily TL and % changes for all asset categories:
+    - precious_metals_tl
+    - crypto_tl
+    - physical_gold_tl
+    """
+    session = SessionLocal()
+
+    query = (
+        session.query(
+            AssetValue.date,
+            AssetValue.precious_metals_tl,
+            AssetValue.crypto_tl,
+            AssetValue.physical_gold_tl,
+        )
+        .filter(and_(AssetValue.date >= start_date, AssetValue.date <= end_date))
+        .order_by(AssetValue.date)
+        .all()
+    )
+    session.close()
+
+    if not query:
+        print("❌ No asset data available for the selected date range.")
+        return None
+
+    df = pd.DataFrame(
+        query,
+        columns=["date", "precious_metals_tl", "crypto_tl", "physical_gold_tl"],
+    ).set_index("date").fillna(0).sort_index()
+
+    # Daily TL and % changes
+    asset_changes = df.diff().fillna(0)
+    asset_pct_changes = (df.pct_change().replace([np.inf, -np.inf], 0) * 100).fillna(0)
+    total = df.sum(axis=1).fillna(0)
+    total_assets_change = total.diff().fillna(0)
+    total_pct_change = (total.pct_change().replace([np.inf, -np.inf], 0) * 100).fillna(0)
+    result = {
+        "pivot": df,  # TL values per category
+        "asset_changes": asset_changes,  # Daily TL changes
+        "asset_pct_changes": asset_pct_changes,  # Daily % changes
+        "total_assets": total,  # Total asset value per day
+        "total_assets_change": total_assets_change,  # Daily TL change of total assets
+        "total_pct_change": total_pct_change,  # Daily % change of total assets   
+    }
+
+    return result
+
+def get_portfolio_summary(fund_result, asset_result):
+    """
+    Combine funds + assets to produce a total summary:
+    - Start value, end value
+    - TL and % change
+    """
+
+    if fund_result is None and asset_result is None:
+        return None
+    # Fund total per day
+    fund_total = fund_result["total_funds"] if fund_result else pd.Series(dtype=float)
+    # Asset total per day
+    if asset_result:
+        asset_total = asset_result["pivot"].sum(axis=1)
+    else:
+        asset_total = pd.Series(0, index=fund_total.index)
+
+    # Align indexes
+    combined = pd.concat([fund_total, asset_total], axis=1).fillna(0)
+    combined.columns = ["funds", "assets"]
+    combined["total_portfolio"] = combined["funds"] + combined["assets"]
+
+    # Compute summary
+    start_value = combined["total_portfolio"].iloc[0]
+    end_value = combined["total_portfolio"].iloc[-1]
+    total_change_tl = end_value - start_value
+    total_change_pct = (total_change_tl / start_value) * 100 if start_value != 0 else 0
+
+    result= {
+        "start_value": start_value,
+        "end_value": end_value,
+        "total_change_tl": total_change_tl,
+        "total_change_pct": total_change_pct,
+        "daily_total": combined,
+    }
+    return result
+    
+def get_top_bottom_funds(fund_result, top_n=5):
+    """
+    Calculates top and bottom performing funds by % change 
+    over the selected period.
+    """
+
+    if fund_result is None:
+        return None, None
+
+    # Get start and end values
+    start_values = fund_result["pivot"].iloc[0]
+    end_values = fund_result["pivot"].iloc[-1]
+
+    # Calculate % changes
+    pct_changes = ((end_values - start_values) / start_values) * 100
+    change_tl= end_values - start_values
+    # Find top and bottom funds
+    top_funds_by_pct = pct_changes.sort_values(ascending=False).head(top_n)
+    top_funds_by_tl = change_tl.sort_values(ascending=False).head(top_n)
+    bottom_funds_by_pct = pct_changes.sort_values(ascending=True).head(top_n)
+    bottom_funds_by_tl = change_tl.sort_values(ascending=True).head(top_n)
+    return top_funds_by_pct, top_funds_by_tl, bottom_funds_by_pct, bottom_funds_by_tl
+

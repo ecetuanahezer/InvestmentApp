@@ -30,7 +30,7 @@ investmentapp
 * ingest_data.py # Data parsing and ingestion
 * database.py # SQLAlchemy database setup
 
-* data/ # Saved fund data (daily .txt files)
+* data_funds/ # Saved fund data (daily .txt files)
 * data_assets/ # Saved asset data (daily .txt files)
 
 * requirements.txt # Python dependencies

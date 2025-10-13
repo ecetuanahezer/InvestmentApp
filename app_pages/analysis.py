@@ -62,16 +62,28 @@ def show_analysis():
         # --- Daily Total Values ---
         st.subheader("📅 Daily Total Values (Funds + Assets)")
         
-        total_sum = fund_result["total_funds"] + asset_result["total_assets"]
+        # Merge indexes to ensure all dates are included
+        all_dates = fund_result["total_funds"].index.union(asset_result["total_assets"].index)
+
+        # Fill missing dates with 0
+        total_funds = fund_result["total_funds"].reindex(all_dates, fill_value=0)
+        total_assets = asset_result["total_assets"].reindex(all_dates, fill_value=0)
+        total_funds_pct = fund_result["total_pct_change"].reindex(all_dates, fill_value=0)
+        total_assets_pct = asset_result["total_pct_change"].reindex(all_dates, fill_value=0)
+        total_sum = total_funds + total_assets
         total_sum_pct_change = total_sum.pct_change().fillna(0)
+
         df_total = pd.DataFrame({
-            "Date": fund_result["total_funds"].index,
+            "Date": all_dates,
             "TOTAL (TL)": total_sum.round(2).astype(str) + " TL (" + total_sum_pct_change.round(2).astype(str) + "%)",
-            "Total Funds (TL)": fund_result["total_funds"].round(2).astype(str) + " TL (" + fund_result["total_pct_change"].round(2).astype(str) + "%)",
-            "Total Assets (TL)": asset_result["total_assets"].round(2).astype(str) + " TL (" + asset_result["total_pct_change"].round(2).astype(str) + "%)",
-            "Precious Metals (TL)": asset_result["pivot"]["precious_metals_tl"].round(2).astype(str) + " TL (" + asset_result["asset_pct_changes"]["precious_metals_tl"].round(2).astype(str) + "%)",
-            "Crypto (TL)": asset_result["pivot"]["crypto_tl"].round(2).astype(str) + " TL (" + asset_result["asset_pct_changes"]["crypto_tl"].round(2).astype(str) + "%)",
-            "Physical Gold (TL)": asset_result["pivot"]["physical_gold_tl"].round(2).astype(str) + " TL (" + asset_result["asset_pct_changes"]["physical_gold_tl"].round(2).astype(str) + "%)",
+            "Total Funds (TL)": total_funds.round(2).astype(str) + " TL (" + total_funds_pct.round(2).astype(str) + "%)",
+            "Total Assets (TL)": total_assets.round(2).astype(str) + " TL (" + total_assets_pct.round(2).astype(str) + "%)",
+            "Precious Metals (TL)": asset_result["pivot"]["precious_metals_tl"].reindex(all_dates, fill_value=0).round(2).astype(str) + " TL (" +
+                                    asset_result["asset_pct_changes"]["precious_metals_tl"].reindex(all_dates, fill_value=0).round(2).astype(str) + "%)",
+            "Crypto (TL)": asset_result["pivot"]["crypto_tl"].reindex(all_dates, fill_value=0).round(2).astype(str) + " TL (" +
+                        asset_result["asset_pct_changes"]["crypto_tl"].reindex(all_dates, fill_value=0).round(2).astype(str) + "%)",
+            "Physical Gold (TL)": asset_result["pivot"]["physical_gold_tl"].reindex(all_dates, fill_value=0).round(2).astype(str) + " TL (" +
+                                asset_result["asset_pct_changes"]["physical_gold_tl"].reindex(all_dates, fill_value=0).round(2).astype(str) + "%)",
         }).set_index("Date")
 
         st.dataframe(df_total.round(2), use_container_width=True)

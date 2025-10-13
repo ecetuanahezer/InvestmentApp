@@ -2,7 +2,7 @@ import streamlit as st
 import datetime
 import os
 from io import StringIO
-from ingest_data import parse_and_save_funds
+from ingest_data import parse_and_save_asset, parse_and_save_funds
 
 def add_data():
     st.title("➕ Add Data")
@@ -40,8 +40,9 @@ def add_data():
         physical_gold = st.number_input("Physical Gold (TL)", min_value=0.0, step=1.0)
 
         if st.button("Add Other Assets"):
+            parse_and_save_asset(StringIO(f"precious_metals\tcrypto\tphysical_gold\n{metal}\t{crypto}\t{physical_gold}"), upload_date_assets)
             os.makedirs("data_assets", exist_ok=True)
             with open(f"data_assets/{upload_date_assets}.txt", "w", encoding="utf-8") as f:
-                f.write("Precious Metals\tCrypto\tPhysical Gold\n")
+                f.write("precious_metals\tcrypto\tphysical_gold\n")
                 f.write(f"{metal}\t{crypto}\t{physical_gold}")
             st.success(f"✅ Other assets for {upload_date_assets} saved successfully.")

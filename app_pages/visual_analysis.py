@@ -55,7 +55,7 @@ def show_visual_analysis():
         st.plotly_chart(fig_total, use_container_width=True)
 
         # --- 2 Daily Total Portfolio Value ---
-        st.subheader("Daily Total Portfolio Value (Funds only)")
+        st.subheader("Daily Funds Value")
         st.caption("Shows how your funds portfolio value evolved over time.")
 
         total_df = fund_result["total_funds"].reset_index()
@@ -68,7 +68,7 @@ def show_visual_analysis():
             total_df,
             x="Date",
             y="Total Funds Value (TL)",
-            title="Daily Total Funds Portfolio Value",
+            title="Daily Funds Value",
             markers=True,
         )
         fig_total.update_layout(
@@ -78,32 +78,83 @@ def show_visual_analysis():
             height=450,
         )
         st.plotly_chart(fig_total, use_container_width=True)
-    with col2:
-        # --- 3 Daily Total Portfolio Value ---
-        st.subheader("Daily Total Portfolio Value (Assets only)")
-        st.caption("Shows how your assets portfolio value evolved over time.")
+        
+        # --- 3 Daily Precious Metals Value ---
+        st.subheader("Daily Crypto Value")
+        st.caption("Shows how your crypto portfolio value evolved over time.")
 
-        total_df = asset_result["total_assets"].reset_index()
-        total_df.columns = ["Date", "Total Assets Value (TL)"]
-        total_df["Total Assets Value (TL)"] = total_df[
-            "Total Assets Value (TL)"
+        total_df = asset_result["pivot"]["crypto_tl"].reset_index()
+        total_df.columns = ["Date", "Crypto Value (TL)"]
+        total_df["Crypto Value (TL)"] = total_df[
+            "Crypto Value (TL)"
         ].fillna(0)
 
         fig_total = px.line(
             total_df,
             x="Date",
-            y="Total Assets Value (TL)",
-            title="Daily Total Assets Portfolio Value",
+            y="Crypto Value (TL)",
+            title="Daily Crypto Value",
             markers=True,
         )
         fig_total.update_layout(
             xaxis_title="Date",
-            yaxis_title="Total Assets Value (TL)",
+            yaxis_title="Crypto Value (TL)",
             title_x=0.5,
             height=450,
         )
         st.plotly_chart(fig_total, use_container_width=True)
 
+    with col2:
+        # --- 4 Daily Precious Metals Value ---
+        st.subheader("Daily Precious Metals Value")
+        st.caption("Shows how your precious metals portfolio value evolved over time.")
+
+        total_df = asset_result["pivot"]["precious_metals_tl"].reset_index()
+        total_df.columns = ["Date", "Precious Metals Value (TL)"]
+        total_df["Precious Metals Value (TL)"] = total_df[
+            "Precious Metals Value (TL)"
+        ].fillna(0)
+
+        fig_total = px.line(
+            total_df,
+            x="Date",
+            y="Precious Metals Value (TL)",
+            title="Daily Precious Metals Value",
+            markers=True,
+        )
+        fig_total.update_layout(
+            xaxis_title="Date",
+            yaxis_title="Precious Metals Value (TL)",
+            title_x=0.5,
+            height=450,
+        )
+        st.plotly_chart(fig_total, use_container_width=True)
+
+        # --- 4 Daily Precious Metals Value ---
+        st.subheader("Daily Physical Gold Value")
+        st.caption("Shows how your physical gold portfolio value evolved over time.")
+
+        total_df = asset_result["pivot"]["physical_gold_tl"].reset_index()
+        total_df.columns = ["Date", "Physical Gold Value (TL)"]
+        total_df["Physical Gold Value (TL)"] = total_df[
+            "Physical Gold Value (TL)"
+        ].fillna(0)
+
+        fig_total = px.line(
+            total_df,
+            x="Date",
+            y="Physical Gold Value (TL)",
+            title="Daily Physical Gold Value",
+            markers=True,
+        )
+        fig_total.update_layout(
+            xaxis_title="Date",
+            yaxis_title="Physical Gold Value (TL)",
+            title_x=0.5,
+            height=450,
+        )
+        st.plotly_chart(fig_total, use_container_width=True)
+        
         # --- 4 Daily Percentage Change ---
         st.subheader("Daily Percentage Change of Total Portfolio")
         st.caption(

@@ -4,6 +4,7 @@ from analyze import get_all_assets_changes, get_all_funds_changes
 import datetime
 import plotly.express as px
 
+
 def show_visual_analysis():
     st.set_page_config(page_title="Visual Analysis", layout="wide")
 
@@ -13,7 +14,9 @@ def show_visual_analysis():
     # --- Date range selection ---
     col1, col2 = st.columns(2)
     with col1:
-        start_date = st.date_input("Start Date", datetime.date.today() - datetime.timedelta(days=7))
+        start_date = st.date_input(
+            "Start Date", datetime.date.today() - datetime.timedelta(days=7)
+        )
     with col2:
         end_date = st.date_input("End Date", datetime.date.today())
 
@@ -33,7 +36,9 @@ def show_visual_analysis():
         st.subheader("Daily Total Portfolio Value (Funds and Assets)")
         st.caption("Shows how your total portfolio value evolved over time.")
 
-        total_df = (fund_result["total_funds"] + asset_result["total_assets"]).reset_index()
+        total_df = (
+            fund_result["total_funds"] + asset_result["total_assets"]
+        ).reset_index()
         total_df.columns = ["Date", "Total Value (TL)"]
         total_df["Total Value (TL)"] = total_df["Total Value (TL)"].fillna(0)
 
@@ -45,10 +50,7 @@ def show_visual_analysis():
             markers=True,
         )
         fig_total.update_layout(
-            xaxis_title="Date",
-            yaxis_title="Total Value (TL)",
-            title_x=0.5,
-            height=450
+            xaxis_title="Date", yaxis_title="Total Value (TL)", title_x=0.5, height=450
         )
         st.plotly_chart(fig_total, use_container_width=True)
 
@@ -58,7 +60,9 @@ def show_visual_analysis():
 
         total_df = fund_result["total_funds"].reset_index()
         total_df.columns = ["Date", "Total Funds Value (TL)"]
-        total_df["Total Funds Value (TL)"] = total_df["Total Funds Value (TL)"].fillna(0)
+        total_df["Total Funds Value (TL)"] = total_df["Total Funds Value (TL)"].fillna(
+            0
+        )
 
         fig_total = px.line(
             total_df,
@@ -71,17 +75,19 @@ def show_visual_analysis():
             xaxis_title="Date",
             yaxis_title="Total Funds Value (TL)",
             title_x=0.5,
-            height=450
+            height=450,
         )
         st.plotly_chart(fig_total, use_container_width=True)
-    with col2:    
+    with col2:
         # --- 3 Daily Total Portfolio Value ---
         st.subheader("Daily Total Portfolio Value (Assets only)")
         st.caption("Shows how your assets portfolio value evolved over time.")
 
         total_df = asset_result["total_assets"].reset_index()
         total_df.columns = ["Date", "Total Assets Value (TL)"]
-        total_df["Total Assets Value (TL)"] = total_df["Total Assets Value (TL)"].fillna(0)
+        total_df["Total Assets Value (TL)"] = total_df[
+            "Total Assets Value (TL)"
+        ].fillna(0)
 
         fig_total = px.line(
             total_df,
@@ -94,13 +100,15 @@ def show_visual_analysis():
             xaxis_title="Date",
             yaxis_title="Total Assets Value (TL)",
             title_x=0.5,
-            height=450
+            height=450,
         )
         st.plotly_chart(fig_total, use_container_width=True)
-        
+
         # --- 4 Daily Percentage Change ---
         st.subheader("Daily Percentage Change of Total Portfolio")
-        st.caption("Shows the daily volatility and direction of change in your total portfolio.")
+        st.caption(
+            "Shows the daily volatility and direction of change in your total portfolio."
+        )
 
         pct_df = fund_result["total_pct_change"].reset_index()
         pct_df.columns = ["Date", "Daily % Change"]
@@ -115,10 +123,7 @@ def show_visual_analysis():
             color_continuous_scale="RdYlGn",
         )
         fig_pct.update_layout(
-            xaxis_title="Date",
-            yaxis_title="% Change",
-            title_x=0.5,
-            height=450
+            xaxis_title="Date", yaxis_title="% Change", title_x=0.5, height=450
         )
         st.plotly_chart(fig_pct, use_container_width=True)
 

@@ -33,7 +33,9 @@ def parse_and_save_funds(file_path_or_buffer, date: datetime.date):
     values = lines[1].split("\t")
 
     if len(names) != len(values):
-        print(f"{file_path_or_buffer} wrong format: {len(names)} fund names, {len(values)} values found.")
+        print(
+            f"{file_path_or_buffer} wrong format: {len(names)} fund names, {len(values)} values found."
+        )
         return
 
     # Convert values to float
@@ -115,7 +117,8 @@ def parse_and_save_asset(file_path_or_buffer, date: datetime.date):
         print(f"⚠️ Duplicate asset data for {date}, skipped.")
 
     session.close()
-    
+
+
 def load_all_data():
     """
     Loads and saves all fund and asset data files from their respective folders.
@@ -125,7 +128,7 @@ def load_all_data():
     init_db()
 
     # --- Load fund data ---
-    fund_files = sorted(glob.glob("data_funds/*.txt"))
+    fund_files = sorted(glob.glob("data_funds/**/*.txt", recursive=True))
     if not fund_files:
         print("⚠️ No fund data files found in 'data_funds/' folder.")
     else:
@@ -140,7 +143,7 @@ def load_all_data():
             parse_and_save_funds(file_path, date)
 
     # --- Load asset data ---
-    asset_files = sorted(glob.glob("data_assets/*.txt"))
+    asset_files = sorted(glob.glob("data_assets/**/*.txt", recursive=True))
     if not asset_files:
         print("⚠️ No asset data files found in 'data_assets/' folder.")
     else:

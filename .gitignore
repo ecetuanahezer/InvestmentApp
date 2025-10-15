@@ -1,0 +1,27 @@
+# Python cache & build files
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+*.pyo
+*.pyd
+*.so
+
+# Virtual environment
+venv/
+env/
+
+# Database files
+db/*.db
+
+# Logs, temporary files
+*.log
+*.tmp
+
+# Streamlit & cache
+.streamlit/
+.cache/
+
+# OS-specific
+.DS_Store
+Thumbs.db

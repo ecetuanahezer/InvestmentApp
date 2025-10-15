@@ -106,8 +106,15 @@ def delete_data():
 
         # Entire month delete
         if st.button(f"🗑️ Delete Entire Month Data ({label})", key=f"del_month_{selected_month_folder}"):
-            delete_entire_month(label, year, month, selected_month_folder)
+            st.session_state.confirm_delete_month = True
 
+        if st.session_state.get("confirm_delete_month", False):
+            st.warning(f"⚠️ Are you sure you want to delete ALL data for {label}? This action cannot be undone.")
+            confirm_month = st.checkbox("Yes, I want to permanently delete this month's data.", key=f"chk_month_{selected_month_folder}")
+            if confirm_month and st.button("🚨 Confirm Delete Month", key=f"confirm_btn_{selected_month_folder}"):
+                delete_entire_month(label, year, month, selected_month_folder)
+                st.session_state.confirm_delete_month = False
+        
         # Specific day delete
         funds_month_dir = os.path.join("data_funds", selected_month_folder)
         assets_month_dir = os.path.join("data_assets", selected_month_folder)
@@ -119,17 +126,23 @@ def delete_data():
             selected_day = st.selectbox("Select a date to delete:", available_days, key=f"day_{selected_month_folder}")
 
             if st.button(f"🗑️ Delete {selected_day} Data", key=f"del_day_{selected_month_folder}"):
-                date_obj = datetime.datetime.strptime(selected_day, "%Y-%m-%d").date()
-                session = SessionLocal()
-                deleted_funds = session.query(FundValue).filter(FundValue.date == date_obj).delete()
-                deleted_assets = session.query(AssetValue).filter(AssetValue.date == date_obj).delete()
-                session.commit()
-                session.close()
+                st.session_state.confirm_delete_day = selected_day
 
-                # Delete files
-                for base_dir in ["data_funds", "data_assets"]:
-                    file_path = os.path.join(base_dir, selected_month_folder, f"{selected_day}.txt")
-                    if os.path.exists(file_path):
-                        os.remove(file_path)
+            if st.session_state.get("confirm_delete_day") == selected_day:
+                st.warning(f"⚠️ Are you sure you want to delete data for {selected_day}? This action cannot be undone.")
+                confirm_day = st.checkbox("Yes, permanently delete this day’s data.", key=f"chk_day_{selected_month_folder}_{selected_day}")
+                if confirm_day and st.button("🚨 Confirm Delete Day", key=f"confirm_day_btn_{selected_month_folder}_{selected_day}"):
+                    date_obj = datetime.datetime.strptime(selected_day, "%Y-%m-%d").date()
+                    session = SessionLocal()
+                    deleted_funds = session.query(FundValue).filter(FundValue.date == date_obj).delete()
+                    deleted_assets = session.query(AssetValue).filter(AssetValue.date == date_obj).delete()
+                    session.commit()
+                    session.close()
 
-                st.success(f"✅ Deleted data for {selected_day} ({deleted_funds} fund rows, {deleted_assets} asset rows).")
+                    # Delete files
+                    for base_dir in ["data_funds", "data_assets"]:
+                        file_path = os.path.join(base_dir, selected_month_folder, f"{selected_day}.txt")
+                        if os.path.exists(file_path):
+                            os.remove(file_path)
+
+                    st.success(f"✅ Deleted data for {selected_day} ({deleted_funds} fund rows, {deleted_assets} asset rows).")
